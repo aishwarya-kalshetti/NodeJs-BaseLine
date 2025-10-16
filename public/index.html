@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Auth System - Login & Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .form-container {
+            display: none;
+        }
+        
+        .form-container.active {
+            display: block;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .toggle-form {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .user-info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            margin-top: 1rem;
+        }
+        
+        .feedback-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e1e5e9;
+        }
+        
+        .feedback-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Auth System</h1>
+        
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container active">
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div class="toggle-form">
+                <a onclick="showRegister()">Don't have an account? Register</a>
+            </div>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerForm" class="form-container">
+            <form onsubmit="register(event)">
+                <div class="form-group">
+                    <label for="regName">Name:</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email:</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password:</label>
+                    <input type="password" id="regPassword" required minlength="6">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <div class="toggle-form">
+                <a onclick="showLogin()">Already have an account? Login</a>
+            </div>
+        </div>
+        
+        <!-- User Dashboard -->
+        <div id="dashboard" class="form-container">
+            <div class="user-info">
+                <h3>Welcome, <span id="userName"></span>!</h3>
+                <p>Email: <span id="userEmail"></span></p>
+            </div>
+            
+            <div class="feedback-section">
+                <h3>Submit Feedback</h3>
+                <form onsubmit="submitFeedback(event)">
+                    <div class="form-group">
+                        <textarea id="feedbackText" placeholder="Share your feedback..." required></textarea>
+                    </div>
+                    <button type="submit">Submit Feedback</button>
+                </form>
+                
+                <h3>Your Feedback</h3>
+                <div id="feedbackList"></div>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authToken = null;
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Toggle forms
+        function showLogin() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('registerForm').classList.remove('active');
+            document.getElementById('dashboard').classList.remove('active');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.add('active');
+            document.getElementById('dashboard').classList.remove('active');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.remove('active');
+            document.getElementById('dashboard').classList.add('active');
+        }
+
+        // Register function
+        async function register(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Registration successful! Please check your email for verification.', 'success');
+                    showLogin();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Registration failed. Please try again.', 'error');
+            }
+        }
+
+        // Login function
+        async function login(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    showMessage('Login successful!', 'success');
+                    showDashboard();
+                    loadUserData();
+                    loadFeedback();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Login failed. Please try again.', 'error');
+            }
+        }
+
+        // Load user data
+        function loadUserData() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+
+        // Submit feedback
+        async function submitFeedback(event) {
+            event.preventDefault();
+            
+            const feedbackText = document.getElementById('feedbackText').value;
+
+            try {
+                const response = await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ feedbackText })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Feedback submitted successfully!', 'success');
+                    document.getElementById('feedbackText').value = '';
+                    loadFeedback();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to submit feedback.', 'error');
+            }
+        }
+
+        // Load feedback
+        async function loadFeedback() {
+            try {
+                const response = await fetch('/api/feedback/my', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const feedbackList = document.getElementById('feedbackList');
+                    if (data.feedbacks && data.feedbacks.length > 0) {
+                        feedbackList.innerHTML = data.feedbacks.map(feedback => 
+                            `<div class="feedback-item">
+                                <p>${feedback.feedbackText}</p>
+                                <small>${new Date(feedback.createdAt).toLocaleString()}</small>
+                            </div>`
+                        ).join('');
+                    } else {
+                        feedbackList.innerHTML = '<p>No feedback submitted yet.</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load feedback:', error);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            currentUser = null;
+            authToken = null;
+            showLogin();
+            showMessage('Logged out successfully!', 'success');
+        }
+
+        // Check server status on load
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                console.log('Server status:', data);
+            } catch (error) {
+                console.error('Server not responding:', error);
+                showMessage('Server not responding. Please check if the server is running.', 'error');
+            }
+        };
+    </script>
+</body>
+</html>
